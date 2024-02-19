@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
-from . import models, database
-from .routers import user, auth, openai
+from app import models, database
+from app.routers import user, auth, openai
 
 models.Base.metadata.create_all(bind=database.engine)
 
