@@ -1,0 +1,20 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# venv
+venv/
+
+# IDE
+.idea/
+.vscode/
+
+# local env files
+.env
+
+#docker
+docker-compose.yml
+
+#db
+*.db
