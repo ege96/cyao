@@ -7,7 +7,7 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from ..database import SessionLocal
-from ..dependencies import authenticate_user
+from ..dependencies import authenticate_user, get_current_user
 from ..schemas import UserLogin
 
 router = APIRouter()
@@ -35,6 +35,16 @@ def create_access_token(data: dict, expires_delta: timedelta = timedelta(minutes
     return encoded_jwt
 
 
+def refresh_access_token(token: str):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        if "exp" in payload and datetime.fromtimestamp(payload["exp"]) < datetime.utcnow():
+            del payload["exp"]
+            return create_access_token(data=payload)
+    except jwt.JWTError:
+        raise HTTPException(status_code=401, detail="Could not validate credentials")
+
+
 @router.post("/token/")
 async def login_for_access_token(user_login: UserLogin, db: Session = Depends(get_db)):
     user = authenticate_user(db, user_login.email, user_login.password)
@@ -43,3 +53,9 @@ async def login_for_access_token(user_login: UserLogin, db: Session = Depends(ge
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(data={"sub": user.email}, expires_delta=access_token_expires)
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.post("/token/refresh/")
+async def refresh_access_token_route(data: dict = Depends(get_current_user)):
+    print("data:", data)
+    return {"access_token": refresh_access_token(data["token"]), "token_type": "bearer"}
