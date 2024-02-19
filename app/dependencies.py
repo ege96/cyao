@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 
 from fastapi import Depends, HTTPException
@@ -31,11 +32,17 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
+        time: int = payload.get("exp")
+
         if username is None:
             raise credentials_exception
+
+        if datetime.fromtimestamp(time) >= datetime.utcnow():
+            raise credentials_exception
+
     except JWTError:
         raise credentials_exception
-    return username
+    return {"username": username, "token": token}
 
 
 def authenticate_user(db: Session, email: str, password: str):
