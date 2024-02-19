@@ -12,8 +12,8 @@ client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 @router.post("/completion", response_model=OpenAIResponse)
-async def openai_completion(request: OpenAIRequest, username: str = Depends(get_current_user)):
-    print("username:", username)
+async def openai_completion(request: OpenAIRequest, data: dict = Depends(get_current_user)):
+    print("username:", data["username"])
 
     try:
         response = await client.chat.completions.create(model=request.engine,

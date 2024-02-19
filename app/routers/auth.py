@@ -57,5 +57,4 @@ async def login_for_access_token(user_login: UserLogin, db: Session = Depends(ge
 
 @router.post("/token/refresh/")
 async def refresh_access_token_route(data: dict = Depends(get_current_user)):
-    print("data:", data)
     return {"access_token": refresh_access_token(data["token"]), "token_type": "bearer"}
